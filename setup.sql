@@ -1,0 +1,97 @@
+USE [Chatbot-RAG]
+GO
+/****** Object:  Table [dbo].[Chats]    Script Date: 24-02-2025 04:17:44 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Chats](
+	[ChatId] [int] IDENTITY(1,1) NOT NULL,
+	[ChatName] [nvarchar](100) NULL,
+	[CreatedDate] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[ChatId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Messages]    Script Date: 24-02-2025 04:17:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Messages](
+	[MessageId] [int] IDENTITY(1,1) NOT NULL,
+	[ChatId] [int] NOT NULL,
+	[UserId] [int] NOT NULL,
+	[MessageContent] [nvarchar](max) NOT NULL,
+	[IsAssistant] [bit] NOT NULL,
+	[CreatedDate] [datetime] NOT NULL,
+	[IsPDF] [bit] NOT NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[MessageId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[UserChats]    Script Date: 24-02-2025 04:17:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UserChats](
+	[UserId] [int] NOT NULL,
+	[ChatId] [int] NOT NULL,
+	[JoinedDate] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[UserId] ASC,
+	[ChatId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Users]    Script Date: 24-02-2025 04:17:45 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Users](
+	[UserId] [int] IDENTITY(1,1) NOT NULL,
+	[Username] [nvarchar](50) NOT NULL,
+	[Email] [nvarchar](100) NOT NULL,
+	[PasswordHash] [nvarchar](255) NOT NULL,
+	[CreatedDate] [datetime] NULL,
+PRIMARY KEY CLUSTERED 
+(
+	[UserId] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY],
+UNIQUE NONCLUSTERED 
+(
+	[Username] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, OPTIMIZE_FOR_SEQUENTIAL_KEY = OFF) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[Chats] ADD  DEFAULT (getdate()) FOR [CreatedDate]
+GO
+ALTER TABLE [dbo].[Messages] ADD  DEFAULT ((0)) FOR [IsAssistant]
+GO
+ALTER TABLE [dbo].[Messages] ADD  DEFAULT (getdate()) FOR [CreatedDate]
+GO
+ALTER TABLE [dbo].[Messages] ADD  DEFAULT ((0)) FOR [IsPDF]
+GO
+ALTER TABLE [dbo].[UserChats] ADD  DEFAULT (getdate()) FOR [JoinedDate]
+GO
+ALTER TABLE [dbo].[Users] ADD  DEFAULT (getdate()) FOR [CreatedDate]
+GO
+ALTER TABLE [dbo].[Messages]  WITH CHECK ADD FOREIGN KEY([ChatId])
+REFERENCES [dbo].[Chats] ([ChatId])
+GO
+ALTER TABLE [dbo].[Messages]  WITH CHECK ADD FOREIGN KEY([UserId])
+REFERENCES [dbo].[Users] ([UserId])
+GO
+ALTER TABLE [dbo].[UserChats]  WITH CHECK ADD FOREIGN KEY([ChatId])
+REFERENCES [dbo].[Chats] ([ChatId])
+GO
+ALTER TABLE [dbo].[UserChats]  WITH CHECK ADD FOREIGN KEY([UserId])
+REFERENCES [dbo].[Users] ([UserId])
+GO
